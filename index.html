@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أمان بيتك - الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0061ff; 
+            --primary-dark: #0046b8;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --text-main: #1c1e21;
+            --text-sub: #65676b;
+        }
+
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
+        
+        #custom-alert {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            background: white; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center; z-index: 2000; transition: 0.3s; width: 80%; max-width: 300px;
+        }
+        #custom-alert.show { transform: translate(-50%, -50%) scale(1); }
+        #custom-alert i { font-size: 50px; margin-bottom: 15px; }
+        #custom-alert .success-icon { color: var(--secondary); }
+        #custom-alert .error-icon { color: var(--danger); }
+        #custom-alert button { background: var(--primary); color: white; border: none; padding: 10px 30px; border-radius: 10px; margin-top: 15px; cursor: pointer; font-family: 'Cairo'; }
+
+        .app-bar { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; padding: 20px; text-align: center; position: sticky; 
+            top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .admin-lock { position: absolute; left: 20px; opacity: 0.3; cursor: pointer; }
+
+        .welcome-banner {
+            padding: 15px; background: var(--white); margin: 15px;
+            border-radius: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .page { display: none; padding: 10px 15px 120px; animation: slideUp 0.4s ease-out; }
+        .active-page { display: block; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 20px; position: relative;}
+        
+        h3 { font-size: 17px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--text-sub); }
+        input, select { 
+            width: 100%; padding: 12px; border: 1.5px solid #e4e6eb; border-radius: 12px; 
+            font-family: 'Cairo'; font-size: 14px; box-sizing: border-box;
+        }
+
+        .btn { 
+            width: 100%; padding: 14px; border: none; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+        }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-sec { background: var(--secondary); color: white; }
+        .btn-danger { background: var(--danger); color: white; margin-top: 10px; font-size: 13px; padding: 8px; }
+        .btn-wa { background: #25D366; color: white; margin-top: 10px; font-size: 14px; padding: 10px; }
+
+        .nav-bar { 
+            position: fixed; bottom: 0; width: 100%; background: white; 
+            display: flex; padding: 10px 0 25px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; 
+        }
+        .nav-item { text-align: center; color: #bcc0c4; cursor: pointer; flex: 1; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+        .nav-item span { font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: var(--primary); }
+
+        .order-card { border-right: 5px solid var(--primary); position: relative; }
+        .price-badge { background: #e7f3ff; color: var(--primary); padding: 4px 10px; border-radius: 8px; font-weight: bold; font-size: 12px; float: left;}
+        .edit-badge { color: var(--text-sub); font-size: 11px; cursor: pointer; float: right; }
+    </style>
+</head>
+<body>
+
+<div id="custom-alert">
+    <i id="alert-icon"></i>
+    <h2 id="alert-title" style="font-size:18px;"></h2>
+    <p id="alert-msg" style="font-size:14px; color:gray;"></p>
+    <button onclick="closeAlert()">حسناً</button>
+</div>
+
+<div class="app-bar">
+    <i class="fas fa-user-shield admin-lock" onclick="openAdmin()"></i>
+    <span id="appTitle">منصة أمان بيتك</span>
+</div>
+
+<div id="pageHome" class="page active-page">
+    <div class="welcome-banner">
+        <h2>نظام حجز خطوط الطلاب</h2>
+        <p>سهولة، سرعة، وأمان لكل بيت بصراوي</p>
+    </div>
+    <div class="card">
+        <h3><i class="fas fa-edit"></i> اطلب خطك الآن</h3>
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group" style="flex: 2;"><label>الاسم</label><input type="text" id="zName" placeholder="مثال: أحمد"></div>
+            <div class="input-group" style="flex: 1;"><label>العمر</label><input type="number" id="zAge" placeholder="20"></div>
+        </div>
+        <div class="input-group"><label>رقم الهاتف (واتساب)</label><input type="tel" id="zPhone" placeholder="07XXXXXXXXX"></div>
+        <div class="input-group"><label>نوع الخط</label><select id="zType"><option>بنات 🌸</option><option>ولد 🚙</option></select></div>
+        <div class="input-group"><label>من منطقة</label><input type="text" id="zFrom" placeholder="مثال: القبلة"></div>
+        <div class="input-group"><label>إلى منطقة</label><input type="text" id="zTo" placeholder="مثال: جامعة البصرة"></div>
+        <div class="input-group"><label>السعر التقريبي</label><input type="text" id="zPrice" placeholder="مثال: 50,000"></div>
+        <div class="input-group"><label>كود الحذف (سري لتعديل طلبك مستقبلاً)</label><input type="password" id="zPass" placeholder="اختر رقم سري"></div>
+        <button class="btn btn-main" onclick="sendOrder()">نشر الطلب</button>
+    </div>
+</div>
+
+<div id="pageOrders" class="page">
+    <div class="welcome-banner"><h2>الطلبات المتاحة</h2><p>تصفح طلبات الزبائن</p></div>
+    <div id="allOrdersContainer"></div>
+</div>
+
+<div id="pageDriver" class="page">
+    <div id="driverLock">
+        <div class="card">
+            <h3>تسجيل سائق جديد</h3>
+            <div class="input-group"><label>الاسم الكامل</label><input type="text" id="dNameReg"></div>
+            <div class="input-group"><label>نوع السيارة</label><input type="text" id="dCar"></div>
+            <div class="input-group"><label>المسار</label><input type="text" id="dRoute"></div>
+            <div class="input-group"><label>السعر</label><input type="text" id="dPricePer"></div>
+            <button class="btn btn-sec" onclick="registerDriver()">سجل واحصل على كود</button>
+        </div>
+        <div class="card" style="text-align:center;">
+            <h3>دخول السائقين لتعديل البيانات</h3>
+            <input type="text" id="dLoginCode" placeholder="أدخل كودك (مثال: DR-123)">
+            <button class="btn btn-main" style="margin-top:10px;" onclick="loginDriver()">دخول للتعديل</button>
+        </div>
+    </div>
+    <div id="driverDashboard" style="display:none;">
+        <div class="card">
+            <h3>تعديل بيانات الكابتن</h3>
+            <div class="input-group"><label>الاسم</label><input type="text" id="dNameEdit"></div>
+            <div class="input-group"><label>المسار</label><input type="text" id="dRouteEdit"></div>
+            <div class="input-group"><label>السعر</label><input type="text" id="dPriceEdit"></div>
+            <button class="btn btn-sec" onclick="updateDriverData()">تحديث البيانات</button>
+            <button class="btn" style="background:#f0f2f5; margin-top:20px;" onclick="location.reload()">خروج</button>
+        </div>
+    </div>
+</div>
+
+<div id="pageAdmin" class="page">
+    <div class="welcome-banner"><h2>لوحة التحكم (حمزة)</h2></div>
+    <div class="card">
+        <h3>إدارة الطلبات السكنية</h3>
+        <div id="adminOrdersContainer"></div>
+    </div>
+    <div class="card">
+        <h3>إدارة السائقين المسجلين</h3>
+        <div id="adminDriversContainer"></div>
+    </div>
+</div>
+
+<div class="nav-bar">
+    <div class="nav-item active" onclick="showPage('pageHome', this, 'إضافة طلب')"><i class="fas fa-plus-circle"></i><span>الرئيسية</span></div>
+    <div class="nav-item" onclick="showPage('pageOrders', this, 'الطلبات العامة')"><i class="fas fa-users"></i><span>الطلبات</span></div>
+    <div class="nav-item" onclick="showPage('pageDriver', this, 'قسم السائق')"><i class="fas fa-car-side"></i><span>السائق</span></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCSb9JUkkVmQHCIVQ2RDYIlqgXs4dsEjh4",
+        authDomain: "aman-basra-lines.firebaseapp.com",
+        databaseURL: "https://aman-basra-lines-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "aman-basra-lines",
+        storageBucket: "aman-basra-lines.firebasestorage.app",
+        messagingSenderId: "400368091929",
+        appId: "1:400368091929:web:f16564c4813b2ddb6fbb88"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let currentDriverCode = "";
+
+    window.showMessage = (title, msg, type) => {
+        const icon = document.getElementById('alert-icon');
+        icon.className = type === 'success' ? 'fas fa-check-circle success-icon' : 'fas fa-exclamation-circle error-icon';
+        document.getElementById('alert-title').innerText = title;
+        document.getElementById('alert-msg').innerText = msg;
+        document.getElementById('custom-alert').classList.add('show');
+    };
+
+    window.closeAlert = () => document.getElementById('custom-alert').classList.remove('show');
+
+    function formatWhatsApp(phone) {
+        let cleaned = phone.replace(/\D/g, ''); 
+        if (cleaned.startsWith('07')) {
+            return '964' + cleaned.substring(1);
+        } else if (cleaned.startsWith('7')) {
+            return '964' + cleaned;
+        } else if (cleaned.startsWith('964')) {
+            return cleaned;
+        }
+        return cleaned; 
+    }
+
+    window.showPage = (pageId, element, title) => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(pageId).classList.add('active-page');
+        if(element) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+        }
+        document.getElementById('appTitle').innerText = title;
+        if(pageId === 'pageOrders') loadOrders();
+        if(pageId === 'pageAdmin') loadAdminData();
+    };
+
+    window.sendOrder = async () => {
+        const name = document.getElementById('zName').value;
+        const phone = document.getElementById('zPhone').value;
+        const zPass = document.getElementById('zPass').value;
+        if(!name || !phone || !zPass) return showMessage("خطأ", "الاسم، الموبايل، وكود الحذف مطلوبين", "error");
+
+        const newOrderRef = push(ref(db, 'orders'));
+        await set(newOrderRef, {
+            name, phone, zPass,
+            age: document.getElementById('zAge').value,
+            from: document.getElementById('zFrom').value,
+            to: document.getElementById('zTo').value,
+            price: document.getElementById('zPrice').value,
+            type: document.getElementById('zType').value,
+            timestamp: Date.now()
+        });
+        showMessage("تم", "تم النشر بنجاح. احتفظ بكود الحذف!", "success");
+        ['zName', 'zAge', 'zPhone', 'zFrom', 'zTo', 'zPrice', 'zPass'].forEach(id => document.getElementById(id).value = "");
+    };
+
+    window.userEditOrder = async (id) => {
+        const pass = prompt("أدخل كود الحذف الخاص بطلبك:");
+        const snap = await get(ref(db, 'orders/' + id));
+        if(snap.exists() && snap.val().zPass === pass) {
+            if(confirm("هل تريد حذف هذا الطلب؟")) {
+                await remove(ref(db, 'orders/' + id));
+                showMessage("تم", "تم حذف طلبك", "success");
+            }
+        } else {
+            showMessage("خطأ", "الكود غير صحيح!", "error");
+        }
+    };
+
+    function loadOrders() {
+        const container = document.getElementById('allOrdersContainer');
+        onValue(ref(db, 'orders'), (snapshot) => {
+            container.innerHTML = "";
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).reverse().forEach(key => {
+                    const o = data[key];
+                    const waPhone = formatWhatsApp(o.phone);
+                    // النص البرمجي للرسالة الترحيبية
+                    const welcomeMsg = encodeURIComponent(`السلام عليكم، أنا كابتن من منصة أمان بيتك، بخصوص طلب الخط الخاص بك (${o.from} إلى ${o.to}). هل الطلب لا يزال متوفراً؟`);
+                    
+                    container.innerHTML += `
+                        <div class="card order-card">
+                            <span class="edit-badge" onclick="userEditOrder('${key}')"><i class="fas fa-trash"></i> حذف طلبي</span>
+                            <span class="price-badge">${o.price || 'اتفاق'}</span>
+                            <h4>${o.name} <small>(${o.age || '؟'})</small></h4>
+                            <p style="font-size:13px;"><b>من:</b> ${o.from} | <b>إلى:</b> ${o.to}</p>
+                            <a href="https://wa.me/${waPhone}?text=${welcomeMsg}" class="btn btn-wa" target="_blank"><i class="fab fa-whatsapp"></i> قبول الطلب ومراسلة</a>
+                        </div>`;
+                });
+            }
+        });
+    }
+
+    window.registerDriver = async () => {
+        const name = document.getElementById('dNameReg').value;
+        if(!name) return showMessage("خطأ", "اكتب اسمك", "error");
+        const code = "DR-" + Math.floor(100 + Math.random() * 899);
+        await set(ref(db, 'drivers/' + code), {
+            name, code, car: document.getElementById('dCar').value,
+            route: document.getElementById('dRoute').value,
+            price: document.getElementById('dPricePer').value
+        });
+        showMessage("مبروك", "كودك الخاص هو: " + code, "success");
+    };
+
+    window.loginDriver = async () => {
+        const code = document.getElementById('dLoginCode').value;
+        const snapshot = await get(ref(db, 'drivers/' + code));
+        if (snapshot.exists()) {
+            currentDriverCode = code;
+            const d = snapshot.val();
+            document.getElementById('driverLock').style.display = 'none';
+            document.getElementById('driverDashboard').style.display = 'block';
+            document.getElementById('dNameEdit').value = d.name;
+            document.getElementById('dRouteEdit').value = d.route || "";
+            document.getElementById('dPriceEdit').value = d.price || "";
+        } else { showMessage("خطأ", "الكود غير صحيح", "error"); }
+    };
+
+    window.updateDriverData = async () => {
+        await update(ref(db, 'drivers/' + currentDriverCode), {
+            name: document.getElementById('dNameEdit').value,
+            route: document.getElementById('dRouteEdit').value,
+            price: document.getElementById('dPriceEdit').value
+        });
+        showMessage("تم", "تم تحديث بياناتك بنجاح", "success");
+    };
+
+    window.openAdmin = () => {
+        if(prompt("رمز الإدارة:") === "123") showPage('pageAdmin', null, 'إدارة حمزة');
+    };
+
+    function loadAdminData() {
+        onValue(ref(db, 'orders'), snap => {
+            const cont = document.getElementById('adminOrdersContainer');
+            cont.innerHTML = "";
+            if(snap.val()) Object.keys(snap.val()).forEach(k => {
+                cont.innerHTML += `<div class="card" style="margin-bottom:10px;">
+                    <b>الزبون: ${snap.val()[k].name}</b><br>
+                    <small>${snap.val()[k].from} -> ${snap.val()[k].to}</small>
+                    <button class="btn btn-danger" style="padding:5px; font-size:12px;" onclick="deleteOrder('${k}')">حذف الطلب</button>
+                </div>`;
+            });
+        });
+
+        onValue(ref(db, 'drivers'), snap => {
+            const cont = document.getElementById('adminDriversContainer');
+            cont.innerHTML = "";
+            if(snap.val()) Object.keys(snap.val()).forEach(k => {
+                cont.innerHTML += `<div class="card" style="margin-bottom:10px;">
+                    <b>السائق: ${snap.val()[k].name}</b> (كود: ${snap.val()[k].code})<br>
+                    <small>المسار: ${snap.val()[k].route || 'لم يحدد'}</small>
+                    <button class="btn btn-danger" style="padding:5px; font-size:12px;" onclick="deleteDriver('${k}')">حذف السائق</button>
+                </div>`;
+            });
+        });
+    }
+
+    window.deleteOrder = id => { if(confirm("حذف الطلب؟")) remove(ref(db, 'orders/' + id)); };
+    window.deleteDriver = id => { if(confirm("حذف السائق؟")) remove(ref(db, 'drivers/' + id)); };
+</script>
+</body>
+</html>
