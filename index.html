@@ -3,345 +3,1169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز خطوط البصرة - المطور</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title>حجز خطوط البصرة</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
-        :root { --primary: #0061ff; --primary-dark: #0046b8; --secondary: #2ecc71; --danger: #e74c3c; --bg: #f0f2f5; --white: #ffffff; --text-main: #1c1e21; --text-sub: #65676b; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
-        
-        #custom-alert { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); text-align: center; z-index: 5000; transition: 0.3s; width: 85%; max-width: 350px; }
-        #custom-alert.show { transform: translate(-50%, -50%) scale(1); }
-        .alert-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:none; z-index:4999; }
-        
-        .app-bar { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.2rem; }
-        .page { display: none; padding: 10px 15px 120px; animation: slideUp 0.4s ease-out; }
-        .active-page { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .card { background: var(--white); padding: 18px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 15px; border-right: 5px solid transparent; position: relative; }
-        .card-student { border-right-color: var(--primary); }
-        .card-driver { border-right-color: var(--secondary); background: #fafffb; }
-        
-        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #e4e6eb; border-radius: 12px; font-family: 'Cairo'; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-sec { background: var(--secondary); color: white; }
-        
-        /* أزرار تواصل السوشيال ميديا */
-        .btn-whatsapp { background: #25d366; color: white; padding: 8px 14px; font-size: 12px; width: auto; margin-top: 5px; display: inline-flex; text-decoration: none; border-radius: 12px; font-weight: bold; align-items: center; gap: 5px; }
-        .btn-insta { background: #e1306c; color: white; padding: 8px 14px; font-size: 12px; width: auto; margin-top: 5px; display: inline-flex; text-decoration: none; border-radius: 12px; font-weight: bold; align-items: center; gap: 5px; margin-left: 5px; }
-        .btn-telegram { background: #0088cc; color: white; padding: 8px 14px; font-size: 12px; width: auto; margin-top: 5px; display: inline-flex; text-decoration: none; border-radius: 12px; font-weight: bold; align-items: center; gap: 5px; margin-left: 5px; }
-        
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; padding: 10px 0 25px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-item { text-align: center; color: #bcc0c4; cursor: pointer; flex: 1; font-size: 11px; font-weight: bold; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        :root {
+            --primary-blue: #1e62d0;
+            --gradient-start: #1e62d0;
+            --gradient-end: #8a2be2;
+            --bg-light: #f4f7fe;
+            --card-bg: #ffffff;
+            --text-dark: #2d3748;
+            --text-gray: #718096;
+            --green-accent: #155724;
+            --green-bg: #d4edda;
+        }
 
-        .terms-box { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 15px; font-size: 11px; color: var(--text-sub); text-align: right; }
-        .terms-box input { width: 16px; height: 16px; margin: 0; cursor: pointer; margin-top: 2px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .admin-item { background: #f8f9fa; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; }
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: #fdfdfd;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(30, 98, 208, 0.2);
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header-title-box h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .header-title-box i {
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .tab-btn i {
+            font-size: 16px;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary-blue);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .app-content {
+            padding: 16px;
+            flex: 1;
+            padding-bottom: 80px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
+        }
+
+        .card-title-banner {
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .card-title-banner.green-version {
+            background: linear-gradient(135deg, #14532d, #166534);
+        }
+
+        .card-title-banner i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .card-title-banner h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .card-title-banner p {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .form-group label span {
+            color: red;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            right: 12px;
+            color: var(--text-gray);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            background-color: #fafafa;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            background-color: white;
+        }
+
+        .row-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+            accent-color: var(--primary-blue);
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #4f46e5, #3b82f6);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-container {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            padding: 25px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+        }
+
+        .filter-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-dark);
+        }
+
+        .filter-btn.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .badge {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .filter-btn.active .badge {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .driver-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+        }
+
+        .driver-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .driver-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .driver-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background-color: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .driver-avatar.student-avatar {
+            background-color: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .driver-name h4 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .driver-name p {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        .price-tag {
+            background-color: #e6fffa;
+            color: #047481;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .driver-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 12px;
+        }
+
+        .seats-left {
+            color: #c05621;
+            background-color: #fffaf0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-connect {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-admin-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .menu-item-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .menu-icon.blue { background-color: #eff6ff; color: #2563eb; }
+        .menu-icon.green { background-color: #ecfdf5; color: #10b981; }
+
+        .menu-text h4 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .menu-text p {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .menu-item i.fa-chevron-left {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .chat-floating-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #111111;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px; left: 15px;
+            font-size: 20px; cursor: pointer; color: var(--text-gray);
+        }
+
+        /* لوحة تحكم الكابتن المخصصة */
+        .driver-dashboard-box {
+            display: none;
+            margin-top: 15px;
+        }
+        .driver-dashboard-box.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
 
-<div class="alert-overlay" id="overlay"></div>
-<div id="custom-alert">
-    <i id="alert-icon" style="font-size: 45px; margin-bottom: 15px; display: block;"></i>
-    <h3 id="alert-title" style="margin: 0;"></h3>
-    <p id="alert-msg" style="color: #666; font-size: 13px; margin: 15px 0;"></p>
-    <div id="alert-input-cont"></div>
-    <div id="alert-btns" style="display: flex; gap: 10px; margin-top: 10px;"></div>
-</div>
-
-<div class="app-bar">
-    <i class="fas fa-user-shield" style="position:absolute; left:20px; opacity:0.3; cursor:pointer;" onclick="window.askAdmin()"></i>
-    <span>حجز خطوط البصرة</span>
-</div>
-
-<div id="pageHome" class="page active-page">
-    <div class="card card-student">
-        <h3 style="color:var(--primary); text-align:center; margin-top:0;">إضافة طلب خط جديد</h3>
-        <input type="text" id="zName" placeholder="اسم الطالب أو الموظف">
-        <input type="tel" id="zPhone" placeholder="رقم واتساب الزبون (مثال: 077xxxxxxxx)">
-        <input type="text" id="zInsta" placeholder="معرف انستغرام الزبون (اختياري)">
-        <input type="text" id="zTelegram" placeholder="معرف تليغرام الزبون (اختياري)">
-        <input type="text" id="zFrom" placeholder="من منطقة">
-        <input type="text" id="zTo" placeholder="إلى منطقة">
-        <input type="password" id="zPass" placeholder="رمز سري للحذف">
-        
-        <div class="terms-box">
-            <input type="checkbox" id="agreeTerms">
-            <span>أوافق على سياسة الخصوصية ونشر الطلب</span>
-        </div>
-        
-        <button class="btn btn-main" onclick="window.sendOrder()">نشر الطلب الآن</button>
-    </div>
-</div>
-
-<div id="pageOrders" class="page">
-    <h4 style="margin:10px 5px;"><i class="fas fa-car-side"></i> السواق المتاحين</h4>
-    <div id="driversListContainer"></div>
-    
-    <div id="studentsSection" style="display:none;">
-        <hr style="opacity:0.2; margin:20px 0;">
-        <h4 style="margin:10px 5px; color:var(--primary);"><i class="fas fa-users"></i> طلبات الطلاب والموظفين</h4>
-        <div id="studentsListContainer"></div>
-    </div>
-</div>
-
-<div id="pageDriver" class="page">
-    <div id="driverLock">
-        <div class="card" style="text-align:center;">
-            <h3>دخول السائق</h3>
-            <input type="text" id="dLoginCode" placeholder="أدخل كودك DR-XXX">
-            <button class="btn btn-main" onclick="window.loginDriver()">دخول لرؤية الطلبات</button>
-        </div>
-        <div class="card">
-            <h3>سائق جديد</h3>
-            <input type="text" id="dNameReg" placeholder="الاسم الثلاثي">
-            <input type="text" id="dRouteReg" placeholder="المسار">
-            <input type="tel" id="dWhatsAppReg" placeholder="رقم واتساب السائق (مثال: 077xxxxxxxx)">
-            
-            <div class="terms-box">
-                <input type="checkbox" id="dAgreeTerms">
-                <span>أوافق على شروط استرجاع المبلغ المتبقي في حال عدم إكمال الخط أو النقل أو التخلي عن الخط.</span>
+    <div class="app-container">
+        <header class="main-header">
+            <div class="header-title-box">
+                <i class="fa-solid fa-bus"></i>
+                <h1>حجز خطوط البصرة</h1>
             </div>
             
-            <button class="btn btn-sec" onclick="window.registerDriver()">تسجيل وحصول على كود</button>
-        </div>
-    </div>
-    
-    <div id="driverDashboard" style="display:none;">
-        <div class="card card-driver">
-            <h3>لوحة التحكم الخاصة بك</h3>
-            <label>الاسم:</label> <input type="text" id="dNameEdit">
-            <label>المسار:</label> <input type="text" id="dRouteEdit">
-            <label>رقم واتساب:</label> <input type="tel" id="dWhatsAppEdit" placeholder="مثال: 077xxxxxxxx">
-            <label>السعر:</label> <input type="text" id="dPriceEdit">
-            <label>النقص:</label> <input type="number" id="dSeatsEdit">
-            <button class="btn btn-sec" onclick="window.updateDriverInfo()">حفظ البيانات</button>
-            <button class="btn btn-main" style="margin-top:10px; background:#666;" onclick="window.showPage('pageOrders')">رؤية طلبات الطلاب الآن</button>
-            <button class="btn btn-danger" style="margin-top:20px;" onclick="window.logoutDriver()">خروج</button>
-        </div>
-    </div>
-</div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" onclick="switchPage('tab-line', this)">
+                    <i class="fa-solid fa-bus-simple"></i>
+                    <span>طلب خط</span>
+                </button>
+                <button class="tab-btn" onclick="switchPage('tab-explore', this)">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>استكشاف</span>
+                </button>
+                <button class="tab-btn" onclick="switchPage('tab-driver', this)">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span>أنا سائق</span>
+                </button>
+            </nav>
+        </header>
 
-<div id="pageAdmin" class="page">
-    <div class="card">
-        <h3 style="color:var(--danger)"><i class="fas fa-tools"></i> لوحة تحكم حمزة</h3>
-        <p style="font-size:12px; color:gray;">إدارة كافة السائقين والطلبات المسجلة</p>
-        <hr>
-        <div id="adminDriversList"></div>
-        <div id="adminStudentsList" style="margin-top:20px;"></div>
-    </div>
-</div>
+        <main class="app-content">
 
-<div class="nav-bar">
-    <div class="nav-item active" onclick="window.showPage('pageHome', this)"><i class="fas fa-edit"></i><span>طلب خط</span></div>
-    <div class="nav-item" onclick="window.showPage('pageOrders', this)"><i class="fas fa-search-location"></i><span>استكشاف</span></div>
-    <div class="nav-item" onclick="window.showPage('pageDriver', this)"><i class="fas fa-steering-wheel"></i><span>أنا سائق</span></div>
-</div>
+            <section id="tab-line" class="page active">
+                <div class="card-title-banner">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <h2>أضف طلب خط جديد</h2>
+                    <p>أضف طلبك وسيتواصل معك السائق المناسب</p>
+                </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCSb9JUkkVmQHCIVQ2RDYIlqgXs4dsEjh4",
-        authDomain: "aman-basra-lines.firebaseapp.com",
-        databaseURL: "https://aman-basra-lines-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "aman-basra-lines"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // دالة لتنظيف وإضافة مفتاح البلد التلقائي للرقم العراقي
-    function formatWhatsAppNumber(phone) {
-        if (!phone) return "";
-        let cleaned = phone.trim().replace(/[^0-9]/g, '');
-        if (cleaned.startsWith('07')) {
-            cleaned = '964' + cleaned.substring(1);
-        } else if (cleaned.startsWith('7')) {
-            cleaned = '964' + cleaned;
-        }
-        return cleaned;
-    }
-
-    window.showAlert = (title, msg, icon, type="info", showInput=false) => {
-        document.getElementById('alert-title').innerText = title;
-        document.getElementById('alert-msg').innerText = msg;
-        const iconEl = document.getElementById('alert-icon');
-        iconEl.className = icon;
-        iconEl.style.color = type==='danger'?'var(--danger)':'var(--primary)';
-        const inputCont = document.getElementById('alert-input-cont');
-        inputCont.innerHTML = showInput ? `<input type="password" id="modalInput" placeholder="أدخل الرمز" style="text-align:center;">` : "";
-        const btnCont = document.getElementById('alert-btns');
-        btnCont.innerHTML = showInput ? `<button class="btn btn-main" onclick="window.confirmAdmin()">دخول سريع</button>` : `<button class="btn btn-main" onclick="window.closeAlert()">فهمت</button>`;
-        document.getElementById('custom-alert').classList.add('show');
-        document.getElementById('overlay').style.display = 'block';
-    };
-    window.closeAlert = () => { document.getElementById('custom-alert').classList.remove('show'); document.getElementById('overlay').style.display = 'none'; };
-
-    window.showPage = (id, el) => {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.getElementById(id).classList.add('active-page');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        if(el) el.classList.add('active');
-        if(id === 'pageOrders') window.loadLists();
-        if(id === 'pageAdmin') window.loadAdminData();
-    };
-
-    window.sendOrder = async () => {
-        const name = document.getElementById('zName').value;
-        const agree = document.getElementById('agreeTerms').checked;
-        if(!name) return window.showAlert("نقص بيانات", "اكتب اسمك أولاً", "fas fa-user-edit", "danger");
-        if(!agree) return window.showAlert("تنبيه", "يجب الموافقة على الشروط أولاً", "fas fa-info-circle", "danger");
-        
-        await push(ref(db, 'orders'), {
-            name, phone: document.getElementById('zPhone').value,
-            insta: document.getElementById('zInsta').value,
-            telegram: document.getElementById('zTelegram').value,
-            from: document.getElementById('zFrom').value, to: document.getElementById('zTo').value,
-            zPass: document.getElementById('zPass').value
-        });
-        window.showAlert("تم بنجاح", "طلبك منشور الآن للسواق فقط", "fas fa-check-circle");
-        window.showPage('pageOrders');
-    };
-
-    window.loadLists = () => {
-        const isDriver = localStorage.getItem('driverActiveCode');
-        onValue(ref(db, 'drivers'), snap => {
-            const cont = document.getElementById('driversListContainer');
-            cont.innerHTML = "";
-            if(snap.exists()){
-                Object.keys(snap.val()).forEach(k => {
-                    const d = snap.val()[k];
-                    let whatsappBtn = "";
-                    if(d.whatsapp) {
-                        const formattedNum = formatWhatsAppNumber(d.whatsapp);
-                        const msg = encodeURIComponent("أهلاً بك في منصة حجز خطوط البصرة، هل طلب حجز الخط متوفر؟");
-                        whatsappBtn = `<a href="https://wa.me/${formattedNum}?text=${msg}" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب الكابتن</a>`;
-                    }
-                    cont.innerHTML += `<div class="card card-driver">
-                        <h4>الكابتن: ${d.name}</h4>
-                        <p style="font-size:13px;">المسار: ${d.route}</p>
-                        ${whatsappBtn}
-                    </div>`;
-                });
-            }
-        });
-
-        if(isDriver) {
-            document.getElementById('studentsSection').style.display = 'block';
-            onValue(ref(db, 'orders'), snap => {
-                const cont = document.getElementById('studentsListContainer');
-                cont.innerHTML = "";
-                if(snap.exists()){
-                    Object.keys(snap.val()).forEach(k => {
-                        const o = snap.val()[k];
-                        let whatsappBtn = "";
-                        if(o.phone) {
-                            const formattedNum = formatWhatsAppNumber(o.phone);
-                            const msg = encodeURIComponent(`أهلاً بك في منصة حجز خطوط البصرة، هل طلبك لحجز الخط لا زال متوفر يا ${o.name}؟`);
-                            whatsappBtn = `<a href="https://wa.me/${formattedNum}?text=${msg}" target="_blank" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</a>`;
-                        }
-                        let instaBtn = o.insta ? `<a href="https://instagram.com/${o.insta.replace('@','')}" target="_blank" class="btn-insta"><i class="fab fa-instagram"></i> انستا</a>` : "";
-                        let telegramBtn = o.telegram ? `<a href="https://t.me/${o.telegram.replace('@','')}" target="_blank" class="btn-telegram"><i class="fab fa-telegram-plane"></i> تليغرام</a>` : "";
-                        
-                        cont.innerHTML += `<div class="card card-student">
-                            <h4>طالب: ${o.name}</h4>
-                            <p style="font-size:12px;">المسار: ${o.from} ➔ ${o.to}</p>
-                            <div style="margin-top: 10px;">
-                                ${whatsappBtn}
-                                ${instaBtn}
-                                ${telegramBtn}
+                <div class="card">
+                    <form id="lineForm" onsubmit="event.preventDefault();">
+                        <div class="form-group">
+                            <label>اسم الطالب أو الموظف <span>*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" id="studentName" class="form-control" placeholder="أدخل اسمك الكامل" required>
                             </div>
-                        </div>`;
-                    });
+                        </div>
+
+                        <div class="form-group">
+                            <label>رقم واتساب <span>*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <input type="tel" id="studentWhatsapp" class="form-control" placeholder="077xxxxxxxx" style="direction: ltr; text-align: right;" required>
+                            </div>
+                        </div>
+
+                        <div class="row-inputs">
+                            <div class="form-group">
+                                <label>انستغرام</label>
+                                <div class="input-wrapper">
+                                    <i class="fa-brands fa-instagram"></i>
+                                    <input type="text" id="studentInsta" class="form-control" placeholder="@username">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>تيليغرام</label>
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-paper-plane" style="font-size: 12px;"></i>
+                                    <input type="text" id="studentTele" class="form-control" placeholder="@username">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 15px;">
+                            <p style="font-size: 13px; font-weight: 700; margin-bottom: 10px; color: #1e3a8a;"><i class="fa-solid fa-location-dot"></i> المسار</p>
+                            <div class="row-inputs">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>من منطقة <span>*</span></label>
+                                    <input type="text" id="studentFrom" class="form-control" placeholder="مثال: الزبير" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>إلى منطقة <span>*</span></label>
+                                    <input type="text" id="studentTo" class="form-control" placeholder="مثال: البصرة" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>رمز سري للحذف (اختياري)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="studentPassword" class="form-control" placeholder="رمز تختاره لحذف طلبك لاحقاً">
+                            </div>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">أوافق على <a href="#">سياسة الخصوصية</a> ونشر الطلب للعموم</label>
+                        </div>
+
+                        <button class="btn-submit" type="button" onclick="submitStudentRequest()">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>نشر الطلب الآن</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="tab-explore" class="page">
+                <div class="search-container">
+                    <h3 style="font-size: 18px; font-weight: 700;">استكشاف الكباتن</h3>
+                    <p style="font-size: 13px; opacity: 0.9;">ابحث عن كابتن لخطك المروري المناسب...</p>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" oninput="filterResults()" placeholder="ابحث بالاسم أو المنطقة...">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                </div>
+
+                <div class="filter-toggle" id="exploreFilterTabs" style="display: none;">
+                    <button id="btnDrivers" class="filter-btn active" onclick="setExploreTab('drivers')">
+                        <span>السائقون</span>
+                        <span class="badge" id="badgeDrivers">0</span>
+                    </button>
+                    <button id="btnRequests" class="filter-btn" onclick="setExploreTab('requests')">
+                        <span>الطلبات المستلمة</span>
+                        <span class="badge" id="badgeRequests">0</span>
+                    </button>
+                </div>
+
+                <div id="resultsContainer"></div>
+            </section>
+
+            <section id="tab-driver" class="page">
+                <div class="card-title-banner green-version">
+                    <i class="fa-solid fa-car-rear"></i>
+                    <h2>بوابة السائق</h2>
+                    <p>سجّل بياناتك أو ادخل للوحة التحكم</p>
+                </div>
+
+                <div class="menu-list" id="driverMainOptions">
+                    <div class="menu-item" onclick="loginDriverDashboard()">
+                        <div class="menu-item-right">
+                            <div class="menu-icon blue">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                            </div>
+                            <div class="menu-text">
+                                <h4>تسجيل دخول السائق (الطلبات)</h4>
+                                <p>ادخل بباسوردك الخاص dr123 لمتابعة طلبات الطلاب</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </div>
+
+                    <div class="menu-item" onclick="openDriverModal('create')">
+                        <div class="menu-item-right">
+                            <div class="menu-icon green">
+                                <i class="fa-solid fa-user-plus"></i>
+                            </div>
+                            <div class="menu-text">
+                                <h4>سائق جديد</h4>
+                                <p>سجّل بيانات خطك المروري لتظهر في الاستكشاف</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </div>
+                </div>
+
+                <div class="driver-dashboard-box" id="driverControlDashboard">
+                    <div class="card" style="border: 2px solid #10b981; background: #f0fdf4;">
+                        <h4 style="color: #14532d; margin-bottom: 8px;"><i class="fa-solid fa-circle-check"></i> أهلاً بك يا كابتن!</h4>
+                        <p style="font-size: 13px; color: #166534; margin-bottom: 15px;">أنت الآن متصل بالنظام ويمكنك متابعة طلبات الطلاب فوراً في صفحة الاستكشاف.</p>
+                        
+                        <div class="row-inputs">
+                            <button class="btn-submit" style="background: #1e293b; padding: 10px; font-size:14px;" onclick="openDriverModal('edit')">
+                                <i class="fa-solid fa-user-gear"></i> تعديل بياناتي
+                            </button>
+                            <button class="btn-submit" style="background: #dc2626; padding: 10px; font-size:14px;" onclick="logoutDriver()">
+                                <i class="fa-solid fa-power-off"></i> خروج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <button class="chat-floating-btn" onclick="alert('الدعم الفني المباشر لحجز خطوط البصرة جاهز لخدمتكم!')">
+            <i class="fa-regular fa-comment-dots"></i>
+            <span>محادثة</span>
+        </button>
+    </div>
+
+    <div id="driverModal" class="custom-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeDriverModal()">&times;</span>
+            <h3 id="modalDriverTitle" style="margin-bottom: 15px; color: var(--green-accent); text-align: center;"><i class="fa-solid fa-car"></i> تسجيل كابتن جديد</h3>
+            <form id="driverForm" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label>اسم الكابتن <span>*</span></label>
+                    <input type="text" id="driverName" class="form-control" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الواتساب <span>*</span></label>
+                    <input type="tel" id="driverWhatsapp" class="form-control" placeholder="077xxxxxxxx" style="direction: ltr; text-align: right;" required>
+                </div>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>من منطقة <span>*</span></label>
+                        <input type="text" id="driverFrom" class="form-control" placeholder="مثال: الزبير" required>
+                    </div>
+                    <div class="form-group">
+                        <label>إلى منطقة <span>*</span></label>
+                        <input type="text" id="driverTo" class="form-control" placeholder="مثال: گرمة علي" required>
+                    </div>
+                </div>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>سعر الخط (د.ع) <span>*</span></label>
+                        <input type="text" id="driverPrice" class="form-control" placeholder="مثال: 50,000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>المقاعد الشاغرة <span>*</span></label>
+                        <input type="text" id="driverSeats" class="form-control" placeholder="مثال: 3 مقاعد" required>
+                    </div>
+                </div>
+                <button class="btn-submit" style="background: linear-gradient(135deg, #14532d, #166534);" type="button" onclick="saveDriverDataFromServer()">
+                    <i class="fa-solid fa-check"></i> <span id="btnDriverSubmitText">حفظ ونشر كارت السائق</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // تهيئة وإعدادات Firebase Realtime Database
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSb9JUkkVmQHCIVQ2RDYIlqgXs4dsEjh4",
+            authDomain: "aman-basra-lines.firebaseapp.com",
+            databaseURL: "https://aman-basra-lines-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aman-basra-lines",
+            storageBucket: "aman-basra-lines.firebasestorage.app",
+            messagingSenderId: "400368091929",
+            appId: "1:400368091929:web:f16564c4813b2ddb6fbb88",
+            measurementId: "G-T38JK93615"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        let activeTab = 'drivers'; 
+        let driversList = [];
+        let requestsList = [];
+        let isDriverLoggedIn = false; // التحقق من تسجيل دخول السائق بكود dr123
+        let currentDriverKey = null; // لحفظ الـ ID الخاص بالسائق عند التعديل
+
+        // نظام النوتيفيكيشن الصوتي
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playNotificationSound() {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // نغمة مرتفعة مريحة للتنبيه
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); 
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e) { console.log("الصوت يحتاج تفاعل مع الصفحة أولاً."); }
+        }
+
+        window.onload = function() {
+            listenToFirebaseData();
+        };
+
+        function switchPage(pageId, buttonElement) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(pageId).classList.add('active');
+            buttonElement.classList.add('active');
+
+            if (pageId === 'tab-explore') {
+                // إذا لم يكن السائق مسجلاً، نجبر الفلتر ليكون سواقين فقط ونخفي التبويبات
+                if (!isDriverLoggedIn) {
+                    activeTab = 'drivers';
+                    document.getElementById('exploreFilterTabs').style.display = 'none';
+                } else {
+                    document.getElementById('exploreFilterTabs').style.display = 'grid';
                 }
+                renderContent();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // نظام تسجيل دخول وخروج الكابتن
+        // ==========================================
+        function loginDriverDashboard() {
+            const password = prompt("الرجاء إدخال الباسورد الخاص بالسائق للوصول للطلبات المفتوحة:");
+            if (password === "dr123") {
+                isDriverLoggedIn = true;
+                playNotificationSound();
+                alert("تم تسجيل الدخول بنجاح كابتن! تم تفعيل نافذة طلبات الطلاب في صفحة الاستكشاف.");
+                
+                document.getElementById('driverMainOptions').style.display = 'none';
+                document.getElementById('driverControlDashboard').classList.add('active');
+                
+                // تحويل السائق مباشرة للاستكشاف لرؤية طلبات الطلاب
+                const exploreBtn = document.querySelectorAll('.tab-btn')[1];
+                switchPage('tab-explore', exploreBtn);
+                document.getElementById('exploreFilterTabs').style.display = 'grid';
+                setExploreTab('requests');
+            } else if (password !== null) {
+                alert("رمز المرور خاطئ! يرجى إدخال dr123.");
+            }
+        }
+
+        function logoutDriver() {
+            isDriverLoggedIn = false;
+            currentDriverKey = null;
+            document.getElementById('driverMainOptions').style.display = 'flex';
+            document.getElementById('driverControlDashboard').classList.remove('active');
+            document.getElementById('exploreFilterTabs').style.display = 'none';
+            activeTab = 'drivers';
+            alert("تم تسجيل الخروج بنجاح.");
+        }
+
+        // ==========================================
+        // 1. إرسال وحفظ بيانات طلب الطلاب في Firebase
+        // ==========================================
+        async function submitStudentRequest() {
+            const name = document.getElementById('studentName').value.trim();
+            const whatsapp = document.getElementById('studentWhatsapp').value.trim();
+            const insta = document.getElementById('studentInsta').value.trim();
+            const tele = document.getElementById('studentTele').value.trim();
+            const fromLoc = document.getElementById('studentFrom').value.trim();
+            const toLoc = document.getElementById('studentTo').value.trim();
+            const pass = document.getElementById('studentPassword').value.trim();
+            const terms = document.getElementById('terms').checked;
+
+            if (!name || !whatsapp || !fromLoc || !toLoc) {
+                alert('يرجى ملء جميع الحقول الإلزامية التي تحتوي على (*)');
+                return;
+            }
+            if (!terms) {
+                alert('يجب الموافقة على الشروط وسياسة النشر أولاً.');
+                return;
+            }
+
+            try {
+                const newRequestRef = database.ref('lineRequests').push();
+                await newRequestRef.set({
+                    name: name,
+                    whatsapp: whatsapp,
+                    instagram: insta || 'غير متوفر',
+                    telegram: tele || 'غير متوفر',
+                    fromLocation: fromLoc,
+                    toLocation: toLoc,
+                    password: pass || '',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                alert('تم نشر طلبك الحي على السيرفر بنجاح! يمكنك العثور عليه في قسم الاستكشاف.');
+                document.getElementById('lineForm').reset();
+                
+                const exploreBtn = document.querySelectorAll('.tab-btn')[1];
+                switchPage('tab-explore', exploreBtn);
+                setExploreTab('drivers');
+
+            } catch (error) {
+                alert('حدث خطأ أثناء الاتصال بالخادم الداخلي للفايربيس: ' + error.message);
+            }
+        }
+
+        // ==========================================
+        // 2. إدارة المودال الخاص بالسائق (إنشاء / تعديل)
+        // ==========================================
+        function openDriverModal(mode) {
+            document.getElementById('driverModal').style.display = 'flex';
+            if (mode === 'edit' && isDriverLoggedIn) {
+                document.getElementById('modalDriverTitle').innerHTML = '<i class="fa-solid fa-user-gear"></i> تعديل بيانات خطك الحالية';
+                document.getElementById('btnDriverSubmitText').innerText = "تحديث البيانات الحالية";
+                
+                // جلب آخر بيانات كابتن مسجلة محلياً لتسهيل التعديل
+                if(driversList.length > 0) {
+                    const lastDriver = driversList[0]; // يفترض الكابتن يعدل آخر كارت له أو يملأ البيانات مجدداً للتحديث
+                    currentDriverKey = lastDriver.id;
+                    document.getElementById('driverName').value = lastDriver.name || '';
+                    document.getElementById('driverWhatsapp').value = lastDriver.whatsapp || '';
+                    document.getElementById('driverFrom').value = lastDriver.fromLocation || '';
+                    document.getElementById('driverTo').value = lastDriver.toLocation || '';
+                    document.getElementById('driverPrice').value = lastDriver.price || '';
+                    document.getElementById('driverSeats').value = lastDriver.seats || '';
+                }
+            } else {
+                document.getElementById('modalDriverTitle').innerHTML = '<i class="fa-solid fa-car"></i> تسجيل كابتن جديد';
+                document.getElementById('btnDriverSubmitText').innerText = "حفظ ونشر كارت السائق";
+                document.getElementById('driverForm').reset();
+                currentDriverKey = null;
+            }
+        }
+
+        function closeDriverModal() {
+            document.getElementById('driverModal').style.display = 'none';
+        }
+
+        async function saveDriverDataFromServer() {
+            const name = document.getElementById('driverName').value.trim();
+            const whatsapp = document.getElementById('driverWhatsapp').value.trim();
+            const fromLoc = document.getElementById('driverFrom').value.trim();
+            const toLoc = document.getElementById('driverTo').value.trim();
+            const price = document.getElementById('driverPrice').value.trim();
+            const seats = document.getElementById('driverSeats').value.trim();
+
+            if (!name || !whatsapp || !fromLoc || !toLoc || !price || !seats) {
+                alert('الرجاء إكمال كافة الحقول المطلوبة بنجاح.');
+                return;
+            }
+
+            try {
+                let driverRef;
+                if (currentDriverKey) {
+                    driverRef = database.ref('drivers/' + currentDriverKey);
+                } else {
+                    driverRef = database.ref('drivers').push();
+                }
+
+                await driverRef.set({
+                    name: name,
+                    whatsapp: whatsapp,
+                    fromLocation: fromLoc,
+                    toLocation: toLoc,
+                    price: price,
+                    seats: seats,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                alert(currentDriverKey ? 'تم تحديث كارت خطك بنجاح!' : 'أهلاً بك كابتن! تم نشر كارت خطك بنجاح في قسم الاستكشاف.');
+                document.getElementById('driverForm').reset();
+                closeDriverModal();
+                
+                const exploreBtn = document.querySelectorAll('.tab-btn')[1];
+                switchPage('tab-explore', exploreBtn);
+                setExploreTab('drivers');
+
+            } catch (error) {
+                alert('خطأ في إرسال البيانات للسيرفر: ' + error.message);
+            }
+        }
+
+        // ==========================================
+        // 3. الاستماع التلقائي والمباشر للبيانات من السيرفر مع نغمة التنبيه
+        // ==========================================
+        function listenToFirebaseData() {
+            let initialRequestsLoad = true;
+            database.ref('lineRequests').on('value', (snapshot) => {
+                requestsList = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        requestsList.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                    requestsList.reverse(); 
+                }
+                document.getElementById('badgeRequests').innerText = requestsList.length;
+                
+                // تشغيل صوت التنبيه فوراً إذا السائق متصل وجاء طلب جديد
+                if (!initialRequestsLoad && isDriverLoggedIn) {
+                    playNotificationSound();
+                }
+                initialRequestsLoad = false;
+                renderContent();
+            });
+
+            database.ref('drivers').on('value', (snapshot) => {
+                driversList = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        driversList.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                    driversList.reverse();
+                }
+                document.getElementById('badgeDrivers').innerText = driversList.length;
+                renderContent();
             });
         }
-    };
 
-    window.loginDriver = async () => {
-        const code = document.getElementById('dLoginCode').value;
-        const snap = await get(ref(db, 'drivers/' + code));
-        if(snap.exists()){
-            localStorage.setItem('driverActiveCode', code);
-            const d = snap.val();
-            document.getElementById('dNameEdit').value = d.name;
-            document.getElementById('dRouteEdit').value = d.route;
-            document.getElementById('dWhatsAppEdit').value = d.whatsapp || "";
-            document.getElementById('dPriceEdit').value = d.price || "";
-            document.getElementById('dSeatsEdit').value = d.seats || "";
-            document.getElementById('driverLock').style.display = 'none';
-            document.getElementById('driverDashboard').style.display = 'block';
-            window.loadLists();
-        } else { window.showAlert("خطأ", "الكود غير صحيح", "fas fa-times", "danger"); }
-    };
+        function setExploreTab(type) {
+            activeTab = type;
+            document.getElementById('btnDrivers').classList.remove('active');
+            document.getElementById('btnRequests').classList.remove('active');
 
-    window.registerDriver = async () => {
-        const name = document.getElementById('dNameReg').value;
-        const agree = document.getElementById('dAgreeTerms').checked;
-        if(!name) return window.showAlert("تنبيه", "يرجى كتابة الاسم", "fas fa-user", "danger");
-        if(!agree) return window.showAlert("تنبيه", "يجب الموافقة على شروط استرجاع المبلغ", "fas fa-exclamation-triangle", "danger");
-        
-        const code = "DR-" + Math.floor(100+Math.random()*899);
-        await set(ref(db, 'drivers/' + code), { 
-            name, 
-            route: document.getElementById('dRouteReg').value, 
-            whatsapp: document.getElementById('dWhatsAppReg').value,
-            code 
-        });
-        window.showAlert("تم التسجيل", "كودك هو: " + code, "fas fa-id-card");
-    };
+            if (type === 'drivers') {
+                document.getElementById('btnDrivers').classList.add('active');
+            } else {
+                document.getElementById('btnRequests').classList.add('active');
+            }
+            renderContent();
+        }
 
-    window.updateDriverInfo = async () => {
-        const code = localStorage.getItem('driverActiveCode');
-        await update(ref(db, 'drivers/' + code), {
-            name: document.getElementById('dNameEdit').value,
-            route: document.getElementById('dRouteEdit').value,
-            whatsapp: document.getElementById('dWhatsAppEdit').value,
-            price: document.getElementById('dPriceEdit').value,
-            seats: document.getElementById('dSeatsEdit').value
-        });
-        window.showAlert("تم الحفظ", "تم تحديث بياناتك", "fas fa-check");
-    };
+        // ==========================================
+        // 4. معالجة وعرض البيانات في تبويب الاستكشاف
+        // ==========================================
+        function renderContent() {
+            const container = document.getElementById('resultsContainer');
+            if (!container) return;
+            container.innerHTML = '';
 
-    window.logoutDriver = () => { localStorage.removeItem('driverActiveCode'); window.location.reload(); };
+            const term = document.getElementById('searchInput').value.toLowerCase().trim();
 
-    window.askAdmin = () => window.showAlert("دخول حمزة", "أدخل الرمز السري", "fas fa-lock", "info", true);
-    window.confirmAdmin = () => { if(document.getElementById('modalInput').value === "9292") { window.closeAlert(); window.showPage('pageAdmin'); } else { alert("غلط!"); } };
+            if (activeTab === 'drivers') {
+                const filtered = driversList.filter(d => 
+                    d.name.toLowerCase().includes(term) || 
+                    d.fromLocation.toLowerCase().includes(term) || 
+                    d.toLocation.toLowerCase().includes(term)
+                );
 
-    window.loadAdminData = () => {
-        onValue(ref(db, 'drivers'), snap => {
-            const cont = document.getElementById('adminDriversList');
-            cont.innerHTML = "<h4>السواق:</h4>";
-            if(snap.exists()){
-                Object.keys(snap.val()).forEach(k => {
-                    const d = snap.val()[k];
-                    cont.innerHTML += `<div class="admin-item"><span><b>${d.name}</b> (${k})</span><button class="btn btn-danger" onclick="window.deleteItem('drivers/${k}')">حذف</button></div>`;
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-gray); padding:20px;">لا يوجد سائقون متوفرون حالياً مطابقتهم للبحث.</p>';
+                    return;
+                }
+
+                filtered.forEach(d => {
+                    const card = document.createElement('div');
+                    card.className = 'driver-card';
+                    card.innerHTML = `
+                        <div class="driver-info">
+                            <div class="driver-meta">
+                                <div class="driver-avatar"><i class="fa-solid fa-car-side"></i></div>
+                                <div class="driver-name">
+                                    <h4>${d.name}</h4>
+                                    <p><i class="fa-solid fa-route" style="color:var(--primary-blue)"></i> من <b>${d.fromLocation}</b> إلى <b>${d.toLocation}</b></p>
+                                </div>
+                            </div>
+                            <span class="price-tag">${d.price} د.ع</span>
+                        </div>
+                        <div class="driver-footer">
+                            <span class="seats-left"><i class="fa-solid fa-chair"></i> الشاغر: ${d.seats}</span>
+                            <div style="display:flex; gap:8px;">
+                                ${isDriverLoggedIn ? `<button class="btn-admin-delete" onclick="deleteDriverItem('${d.id}')">حذف</button>` : ''}
+                                <a class="btn-connect" href="https://wa.me/${d.whatsapp}" target="_blank"><i class="fa-brands fa-whatsapp"></i> مراسلة</a>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } else if (activeTab === 'requests' && isDriverLoggedIn) {
+                // شاشة الطلبات لا تفتح إلا إذا كان السائق مسجل دخول
+                const filtered = requestsList.filter(r => 
+                    r.name.toLowerCase().includes(term) || 
+                    r.fromLocation.toLowerCase().includes(term) || 
+                    r.toLocation.toLowerCase().includes(term)
+                );
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-gray); padding:20px;">لا توجد طلبات متوفرة حالياً من الطلاب.</p>';
+                    return;
+                }
+
+                filtered.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = 'driver-card';
+                    card.style.borderRight = '4px solid var(--gradient-end)';
+                    card.innerHTML = `
+                        <div class="driver-info">
+                            <div class="driver-meta">
+                                <div class="driver-avatar student-avatar"><i class="fa-solid fa-graduation-cap"></i></div>
+                                <div class="driver-name">
+                                    <h4>${r.name}</h4>
+                                    <p><i class="fa-solid fa-location-dot" style="color:var(--gradient-end)"></i> يطلب: من <b>${r.fromLocation}</b> إلى <b>${r.toLocation}</b></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="driver-footer">
+                            <div style="display:flex; gap:10px; font-size:16px;">
+                                ${r.instagram && r.instagram !== 'غير متوفر' ? `<a href="https://instagram.com/${r.instagram.replace('@','')}" target="_blank" style="color:#e1306c;"><i class="fa-brands fa-instagram"></i></a>` : ''}
+                                ${r.telegram && r.telegram !== 'غير متوفر' ? `<a href="https://t.me/${r.telegram.replace('@','')}" target="_blank" style="color:#0088cc;"><i class="fa-solid fa-paper-plane"></i></a>` : ''}
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-admin-delete" onclick="deleteStudentItem('${r.id}')">إزالة الطلب</button>
+                                <a class="btn-connect" style="background-color:#2563eb;" href="https://wa.me/${r.whatsapp}" target="_blank"><i class="fa-brands fa-whatsapp"></i> اتصال بالطالب</a>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
                 });
             }
-        });
-        onValue(ref(db, 'orders'), snap => {
-            const cont = document.getElementById('adminStudentsList');
-            cont.innerHTML = "<h4>الطلبات:</h4>";
-            if(snap.exists()){
-                Object.keys(snap.val()).forEach(k => {
-                    const o = snap.val()[k];
-                    cont.innerHTML += `<div class="admin-item"><span><b>${o.name}</b> (${o.from})</span><button class="btn btn-danger" onclick="window.deleteItem('orders/${k}')">حذف</button></div>`;
-                });
-            }
-        });
-    };
-    window.deleteItem = async (path) => { if(confirm("حذف نهائي؟")) await remove(ref(db, path)); };
+        }
 
-    if(localStorage.getItem('driverActiveCode')) window.loginDriver();
-</script>
+        function filterResults() {
+            renderContent();
+        }
+
+        async function deleteDriverItem(id) {
+            if (confirm("هل أنت متأكد من حذف كارت هذا السائق نهائياً من السيرفر؟")) {
+                await database.ref('drivers/' + id).remove();
+                alert("تم الحذف بنجاح.");
+            }
+        }
+
+        async function deleteStudentItem(id) {
+            if (confirm("هل تريد إزالة طلب الطالب هذا نهائياً من القائمة النشطة؟")) {
+                await database.ref('lineRequests/' + id).remove();
+                alert("تمت إزالة الطلب بنجاح.");
+            }
+        }
+    </script>
 </body>
-        </html>
-    
+</html>
